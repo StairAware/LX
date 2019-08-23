@@ -211,18 +211,3 @@ public class ActiveSensor {
     sensorPos = (sensorIndex+1)*model.SENSOR_SPACING;
   }
 }
-
-
-// Configuration flags
-final static boolean MULTITHREADED = true;
-final static boolean RESIZABLE = true;
-
-// Helpful global constants
-final static float INCHES = 1;
-final static float IN = INCHES;
-final static float FEET = 12 * INCHES;
-final static float FT = FEET;
-final static float CM = IN / 2.54;
-final static float MM = CM * .1;
-final static float M = CM * 100;
-final static float METER = M;
