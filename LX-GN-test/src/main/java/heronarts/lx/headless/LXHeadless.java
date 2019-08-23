@@ -21,12 +21,19 @@ import java.io.File;
 import heronarts.lx.LX;
 import heronarts.lx.LXPattern;
 import heronarts.lx.model.GridModel;
+import heronarts.lx.model.StripModel;
 import heronarts.lx.model.LXModel;
+import heronarts.lx.model.LXFixture;
+import heronarts.lx.model.LXPoint;
+import heronarts.lx.model.LXAbstractFixture;
 import heronarts.lx.output.ArtNetDatagram;
 import heronarts.lx.output.FadecandyOutput;
 import heronarts.lx.output.LXDatagramOutput;
 import heronarts.lx.output.OPCOutput;
+import heronarts.lx.osc.LXOscListener;
+import heronarts.lx.osc.OscMessage;
 
+import java.util.ArrayList;
 
 /**
  * Example headless CLI for the LX engine. Just write a bit of scaffolding code
@@ -46,10 +53,10 @@ public class LXHeadless {
     public final static int STAIR_DEPTH = 30;
     public final static int LEDS_PER_STAIR = 53;
     public final static float LED_SPACING = 1;
-    public final static float XOFFSET = 0.5;
+    public final static float XOFFSET = 0.5f;
     public final static float YOFFSET = 0;
-    public final static float ZOFFSET = 0.1;
-    public final static float SENSOR_SPACING = (131/25.4)*2; // The sensors are 131mm apart (converted to inches)
+    public final static float ZOFFSET = 0.1f;
+    public final static float SENSOR_SPACING = (131/25.4f)*2; // The sensors are 131mm apart (converted to inches)
 
 
 
@@ -59,7 +66,7 @@ public class LXHeadless {
 
     public StairModel() {
       super(makeStairs());
-      this.stairs = this.fixtures.toArray(new StripModel[0]);
+      this.stairs = this.children("strip").toArray(new StripModel[0]);
     }
 
     public static StripModel[] makeStairs() {
@@ -102,11 +109,21 @@ public class LXHeadless {
   // }
 
 
+  static OscData oscData = new OscData();
+  static boolean useOSC = true;
+  static boolean newOSC = false;
 
+  public static StairModel model;
 
   public static void main(String[] args) {
+
+  ArrayList<ActiveSensor> sensors;
+
+
+    sensors = new ArrayList<ActiveSensor>();
+
     try {
-      LXModel model = buildModel();
+      model = new StairModel();
       LX lx = new LX(model);
 
       try {
@@ -119,7 +136,7 @@ public class LXHeadless {
           //get the stair info, such as /stair0
           if(addr.substring(0, 6).equals("/stair")) {
             newOSC = true;
-            oscData.stairNumber = parseInt(addr.substring(6));
+            oscData.stairNumber = Integer.parseInt(addr.substring(6));
             oscData.sensorIndex = message.getInt(0);
             oscData.sensorValue = message.getInt(1);
             //println(oscData.stairNumber,oscData.sensorIndex, oscData.sensorValue);
@@ -154,7 +171,7 @@ public class LXHeadless {
       lx.addOutput(output);
 
     } catch (Exception x) {
-      println("Error in ArtNet output mapping!");
+      // ("Error in ArtNet output mapping!");
       x.printStackTrace();
     }
 
@@ -171,43 +188,45 @@ public class LXHeadless {
     } catch (Exception x) {
       System.err.println(x.getLocalizedMessage());
     }
-  }
-}
 
 
 
-public static class OscData {
-  int stairNumber;
-  int sensorIndex;
-  int sensorValue;
-}
 
-public class ActiveSensor {
-  int stairNum;
-  int sensorIndex;
-  int sensorValue;
-  float sensorPos;
-
-  ActiveSensor(int sn, int si, int sv) {
-    stairNum = sn;
-    sensorIndex = si;
-    sensorValue = sv;
-    calculateSensorPos();
   }
 
-  void resetSensorValue() {
-    if (sensorValue>0) {
-      sensorValue*=0.85;
+  public static class ActiveSensor {
+    int stairNum;
+    int sensorIndex;
+    int sensorValue;
+    float sensorPos;
+
+    ActiveSensor(int sn, int si, int sv) {
+      stairNum = sn;
+      sensorIndex = si;
+      sensorValue = sv;
+      calculateSensorPos();
+    }
+
+    void resetSensorValue() {
+      if (sensorValue>0) {
+        sensorValue*=0.85;
+      }
+    }
+
+    //get the sensor position by adding all previous stair length plus the sensorIndex*SENSOR_SPACING of current sSENSORVOIDCculateSensorPos() {
+    void calculateSensorPos(){
+      //sensorPos = 0;
+      //for (int i = 0; i < stairNum; i ++) {
+      //  sensorPos += model.LEDS_PER_STAIR*model.LED_SPACING;
+      //}
+      //sensorPos += sensorIndex*model.SENSOR_SPACING;
+      sensorPos = (sensorIndex+1)*model.SENSOR_SPACING;
     }
   }
 
-  //get the sensor position by adding all previous stair length plus the sensorIndex*SENSOR_SPACING of current sSENSORVOIDCculateSensorPos() {
-  void calculateSensorPos(){
-    //sensorPos = 0;
-    //for (int i = 0; i < stairNum; i ++) {
-    //  sensorPos += model.LEDS_PER_STAIR*model.LED_SPACING;
-    //}
-    //sensorPos += sensorIndex*model.SENSOR_SPACING;
-    sensorPos = (sensorIndex+1)*model.SENSOR_SPACING;
+  static public class OscData {
+    int stairNumber;
+    int sensorIndex;
+    int sensorValue;
   }
 }
