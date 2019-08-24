@@ -43,7 +43,7 @@ public class ExamplePattern extends LXPattern {
      float yPos = this.yPos.getValuef();
      float falloff = 100 / (this.width.getValuef());
      for (LXPoint p : model.points) {
-       colors[p.index] = LX.hsb(hue, 100, Math.max(0, brightness - falloff * Math.abs(p.yn - yPos)));
+       colors[p.index] = LX.hsb(hue, 100, Math.max(0, brightness - falloff * Math.abs(p.xn - xPos)));
      }
    }
  }
