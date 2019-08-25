@@ -180,7 +180,8 @@ public class LXHeadless {
         lx.openProject(new File(args[0]));
       } else {
         lx.setPatterns(new LXPattern[] {
-          new ExamplePattern(lx)
+          new ExamplePattern(lx),
+          new PlanePattern(lx)
         });
       }
 
