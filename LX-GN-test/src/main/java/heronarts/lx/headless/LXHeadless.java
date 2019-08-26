@@ -114,7 +114,7 @@ public class LXHeadless {
           public void oscMessage(OscMessage message) {
             // Receive data from brain about stair sensor positions
             // You can store that here somewhere, or update parameters, etc., so that patterns can refer to it
-            //println("stairAware received osc message:"+message);
+            System.out.print("stairAware received osc message:"+message+"\n");
             String triggeredPattern = message.getAddressPattern().getValue().substring(1);
             // println("received:"+triggeredPattern);
             //int effectNum = parseInt(addr.substring(7))+1;
