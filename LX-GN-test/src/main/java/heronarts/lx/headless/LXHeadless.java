@@ -123,7 +123,7 @@ public class LXHeadless {
             //printArray(lx.engine.getPatterns());
 
             for(LXPattern p : lx.engine.getPatterns()){
-              System.out.print(p.getIndex());
+              System.out.print(p.label);
               if(p.label.equals(triggeredPattern)){
                 // println("Activate No."+p.getIndex()+" pattern: "+p.getLabel());
                 lx.engine.goPattern(p);
