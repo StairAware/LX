@@ -116,14 +116,14 @@ public class LXHeadless {
             // You can store that here somewhere, or update parameters, etc., so that patterns can refer to it
             System.out.print("stairAware received osc message:"+message+"\n");
             String triggeredPattern = message.getAddressPattern().getValue().substring(1);
-            // println("received:"+triggeredPattern);
+            System.out.print("received:"+triggeredPattern+"\n");
             //int effectNum = parseInt(addr.substring(7))+1;
             //lx.engine.goIndex(effectNum);
 
             //printArray(lx.engine.getPatterns());
 
             for(LXPattern p : lx.engine.getPatterns()){
-              //println(p.getIndex());
+              System.out.print(p.getIndex());
               if(p.label.equals(triggeredPattern)){
                 // println("Activate No."+p.getIndex()+" pattern: "+p.getLabel());
                 lx.engine.goPattern(p);
