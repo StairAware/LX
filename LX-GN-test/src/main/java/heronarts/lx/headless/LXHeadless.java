@@ -46,51 +46,7 @@ public class LXHeadless {
   //   return new GridModel(30, 30);
   // }
 
-  public static class StairModel extends LXModel {
 
-    public final static int NUM_STAIRS = 2;
-    public final static int STAIR_HEIGHT = 20;
-    public final static int STAIR_DEPTH = 30;
-    public final static int LEDS_PER_STAIR = 53;
-    public final static float LED_SPACING = 1;
-    public final static float XOFFSET = 0.5f;
-    public final static float YOFFSET = 0;
-    public final static float ZOFFSET = 0.1f;
-    public final static float SENSOR_SPACING = (131/25.4f)*2; // The sensors are 131mm apart (converted to inches)
-
-
-
-    public final StripModel[] stairs;
-
-    public final int[] numSens ={9, 9};
-
-    public StairModel() {
-      super(makeStairs());
-      this.stairs = this.children("strip").toArray(new StripModel[0]);
-    }
-
-    public static StripModel[] makeStairs() {
-      StripModel[] stairs = new StripModel[NUM_STAIRS];
-      for (int i = 0; i < NUM_STAIRS; ++i) {
-        StripModel.Metrics metrics = new StripModel.Metrics(LEDS_PER_STAIR)
-          .setOrigin(-LEDS_PER_STAIR*LED_SPACING/2+XOFFSET, (i)*STAIR_HEIGHT+STAIR_HEIGHT/2, (i)*STAIR_DEPTH-STAIR_DEPTH/2-ZOFFSET )
-          .setSpacing(LED_SPACING, 0, 0);
-        stairs[i] = new StripModel(metrics);
-      }
-      return stairs;
-    }
-
-    //public float getSensorSpacing() {
-    //    return LED_SPACING;
-    //  }
-
-    public static class Fixture extends LXAbstractFixture {
-      Fixture() {
-        for (int i = 0; i < NUM_STAIRS; ++i) {
-        }
-      }
-    }
-  }
   // public static void addArtNetOutput(LX lx) throws Exception {
   //   lx.engine.addOutput(
   //     new LXDatagramOutput(lx).addDatagram(
@@ -117,7 +73,7 @@ public class LXHeadless {
 
   public static void main(String[] args) {
 
-  ArrayList<ActiveSensor> sensors;
+    ArrayList<ActiveSensor> sensors;
 
 
     sensors = new ArrayList<ActiveSensor>();
@@ -153,6 +109,34 @@ public class LXHeadless {
     }
 
 
+   try {
+        lx.engine.osc.receiver(8000).addListener(new LXOscListener() {
+          public void oscMessage(OscMessage message) {
+            // Receive data from brain about stair sensor positions
+            // You can store that here somewhere, or update parameters, etc., so that patterns can refer to it
+            //println("stairAware received osc message:"+message);
+            String triggeredPattern = message.getAddressPattern().getValue().substring(1);
+            // println("received:"+triggeredPattern);
+            //int effectNum = parseInt(addr.substring(7))+1;
+            //lx.engine.goIndex(effectNum);
+
+            //printArray(lx.engine.getPatterns());
+
+            for(LXPattern p : lx.engine.getPatterns()){
+              //println(p.getIndex());
+              if(p.label.equals(triggeredPattern)){
+                // println("Activate No."+p.getIndex()+" pattern: "+p.getLabel());
+                lx.engine.goPattern(p);
+                break;
+              }
+            }
+          }
+      });
+    } catch (java.net.SocketException sx) {
+      sx.printStackTrace();
+    }
+
+
     try {
       // In this example, we send an artnet packet for each stair, with its own universe number
       final String ARTNET_IP = "192.168.10.49";
@@ -181,6 +165,7 @@ public class LXHeadless {
       } else {
         lx.setPatterns(new LXPattern[] {
           new PlanePattern(lx),
+          new Rainbow(lx, model),
           new ExamplePattern(lx)
         });
       }
@@ -189,10 +174,6 @@ public class LXHeadless {
     } catch (Exception x) {
       System.err.println(x.getLocalizedMessage());
     }
-
-
-
-
   }
 
   public static class ActiveSensor {
@@ -229,5 +210,51 @@ public class LXHeadless {
     int stairNumber;
     int sensorIndex;
     int sensorValue;
+  }
+}
+
+class StairModel extends LXModel {
+
+  public final static int NUM_STAIRS = 2;
+  public final static int STAIR_HEIGHT = 20;
+  public final static int STAIR_DEPTH = 30;
+  public final static int LEDS_PER_STAIR = 53;
+  public final static float LED_SPACING = 1;
+  public final static float XOFFSET = 0.5f;
+  public final static float YOFFSET = 0;
+  public final static float ZOFFSET = 0.1f;
+  public final static float SENSOR_SPACING = (131/25.4f)*2; // The sensors are 131mm apart (converted to inches)
+
+
+
+  public static StripModel[] stairs;
+
+  public final int[] numSens ={9, 9};
+
+  public StairModel() {
+    super(makeStairs());
+    stairs = this.children("strip").toArray(new StripModel[0]);
+  }
+
+  public static StripModel[] makeStairs() {
+    StripModel[] stairs = new StripModel[NUM_STAIRS];
+    for (int i = 0; i < NUM_STAIRS; ++i) {
+      StripModel.Metrics metrics = new StripModel.Metrics(LEDS_PER_STAIR)
+        .setOrigin(-LEDS_PER_STAIR*LED_SPACING/2+XOFFSET, (i)*STAIR_HEIGHT+STAIR_HEIGHT/2, (i)*STAIR_DEPTH-STAIR_DEPTH/2-ZOFFSET )
+        .setSpacing(LED_SPACING, 0, 0);
+      stairs[i] = new StripModel(metrics);
+    }
+    return stairs;
+  }
+
+  //public float getSensorSpacing() {
+  //    return LED_SPACING;
+  //  }
+
+  public static class Fixture extends LXAbstractFixture {
+    Fixture() {
+      for (int i = 0; i < NUM_STAIRS; ++i) {
+      }
+    }
   }
 }
